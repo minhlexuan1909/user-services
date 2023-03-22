@@ -1,0 +1,24 @@
+{
+  "name": "recipe-app-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app/app/manage.py",
+  "scripts": {
+    "start": "docker-compose -f docker-compose-deploy.yml up",
+    "down": "docker-compose -f docker-compose-deploy.yml down",
+    "test": "docker-compose run --rm app sh -c \"python manage.py test\"",
+    "docker": "docker-compose run --rm app sh -c",
+    "docker-deploy": "docker-compose -f docker-compose-deploy.yml run --rm app sh -c",
+    "docker-push": "docker tag recipe-app-api-app:latest vuasanban/recipe-app-api-app:latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minhlexuan1909/recipe-app-api.git"
+  },
+  "author": "Minh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/minhlexuan1909/recipe-app-api/issues"
+  },
+  "homepage": "https://github.com/minhlexuan1909/recipe-app-api#readme"
+}
