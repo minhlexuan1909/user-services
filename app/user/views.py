@@ -28,7 +28,6 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     """Manage the authenticated user"""
 
     serializer_class = UserSerializer
-    authentication_classes = (authentication.TokenAuthentication,)
     # Set who can access this view (only authenticated user can access)
     permission_classes = (permissions.IsAuthenticated,)
 
