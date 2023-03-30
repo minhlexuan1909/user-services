@@ -36,6 +36,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
+    address = models.TextField(blank=True, null=True)
+    phone = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     """Can login to the admin site."""
     is_staff = models.BooleanField(default=False)
