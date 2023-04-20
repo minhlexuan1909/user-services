@@ -14,7 +14,16 @@ class UserSerializer(serializers.ModelSerializer):
         # Model serializer represents
         model = get_user_model()
         # Fields to be used in the request
-        fields = ("email", "password", "name", "address", "phone")
+        fields = (
+            "email",
+            "password",
+            "name",
+            "address",
+            "address_1",
+            "address_2",
+            "address_3",
+            "phone",
+        )
         # password is write only, cannot be read, min length is 5 (for validation)
         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
 
