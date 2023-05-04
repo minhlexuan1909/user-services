@@ -15,12 +15,12 @@ class UserAdmin(BaseUserAdmin):
     # Display order
     ordering = ["id"]
     # Displayed fields
-    list_display = ["email", "name"]
+    list_display = ["phone", "name"]
 
     # Fields displayed on the change page
     # Syntax: (([group_name], {"fields": ([field1], [field2], ...)}))
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
+        (None, {"fields": ("phone", "password")}),
         ("Personal Info", {"fields": ("name",)}),
         (_("Permissions"), {"fields": ("is_active", "is_staff", "is_superuser")}),
         (_("Important dates"), {"fields": ("last_login",)}),
@@ -34,7 +34,7 @@ class UserAdmin(BaseUserAdmin):
             {
                 "classes": ("wide",),
                 "fields": (
-                    "email",
+                    "phone",
                     "password1",
                     "password2",
                     "name",

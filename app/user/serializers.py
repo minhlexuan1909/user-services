@@ -6,6 +6,8 @@ from django.utils.translation import gettext as _
 
 from rest_framework import serializers
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the users object"""
@@ -15,6 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         # Fields to be used in the request
         fields = (
+            "id",
             "email",
             "password",
             "name",
@@ -25,13 +28,20 @@ class UserSerializer(serializers.ModelSerializer):
             "phone",
         )
         # password is write only, cannot be read, min length is 5 (for validation)
-        extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
+        extra_kwargs = {
+            "password": {"write_only": True, "min_length": 5, "required": False},
+            "phone": {"required": False},
+        }
 
     # Override the default create method
     # The default create method is to create a new object with the validated data, so the password is not encrypted
     # Override it with
     def create(self, validated_data):
         """Create a new user with encrypted password and return it"""
+        if "password" not in validated_data:
+            validated_data.pop("password", None)
+        if "phone" not in validated_data:
+            validated_data.pop("phone", None)
         return get_user_model().objects.create_user(**validated_data)
 
     # Override the default update method (same reason as above)
@@ -55,21 +65,22 @@ class UserSerializer(serializers.ModelSerializer):
 class AuthTokenSerializer(serializers.Serializer):
     """Serializer for the user authentication token"""
 
-    email = serializers.EmailField()
-    password = serializers.CharField(style={"input_type": "password"}, trim_whitespace=False)
+    phone = serializers.CharField(required=False)
+    password = serializers.CharField(
+        style={"input_type": "password"}, trim_whitespace=False, allow_blank=True, required=False
+    )
+    email = serializers.EmailField(required=False)
 
-    def validate(self, attrs):
-        """Validate and authenticate the user"""
-        email = attrs.get("email")
-        password = attrs.get("password")
-        user = authenticate(
-            request=self.context.get("request"),
-            username=email,
-            password=password,
-        )
-        if not user:
-            msg = _("Unable to authenticate with provided credentials")
-            raise serializers.ValidationError(msg, code="authentication")
 
-        attrs["user"] = user
-        return attrs
+class PhoneUpdateSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+    email = serializers.EmailField(required=False)
+
+
+class GetPhoneOtpSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+
+
+class ConfirmPhoneOtpSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+    otp = serializers.CharField(max_length=6)
