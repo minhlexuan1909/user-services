@@ -43,7 +43,16 @@ class CreateTokenView(ObtainAuthToken):
         # user = get_user_model().objects.get(phone=phone) or get_user_model().objects.get(
         #     email=email
         # )
-        user = get_user_model().objects.get(Q(phone=phone) | Q(email=email))
+        try: 
+            user = get_user_model().objects.get(Q(phone=phone) | Q(email=email))
+        except get_user_model().DoesNotExist:
+            return Response(
+                {
+                    "status": 401,
+                    "message": "User phone number or email is not registered",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         if not user.phone:
             return Response(
@@ -143,9 +152,9 @@ def send_sms(user, phone):
 
     phone_converted = "+84" + phone[1:]
 
-    TWILIO_ACCOUNT_SID = "ACd2f88bc27251c6edbdf6d0a38b7a7584"
-    TWILIO_AUTH_TOKEN = "c8fc22bb6caad1538c1bc275abc58f1f"
-    phone_number = "+19094036208"
+    TWILIO_ACCOUNT_SID = "AC92c8ec806af7d36d0953a609f0abffdd"
+    TWILIO_AUTH_TOKEN = "8b61090707dac481030fc381e1510c5d"
+    phone_number = "+14342645429"
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     message = client.messages.create(
         body=f"Your verification code is {random_str}",
@@ -176,7 +185,15 @@ class PhoneUpdateView(generics.UpdateAPIView):
             )
 
         # Update the phone number
-        user = get_user_model().objects.get(email=email)
+        try:
+            user = get_user_model().objects.get(email=email)
+        except get_user_model().DoesNotExist:
+            return Response(
+                {
+                    "message": "Email is not registered",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user.phone = new_phone
         user.save()
 
@@ -193,7 +210,16 @@ class GetPhoneOtpView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         phone = request.data.get("phone")
-        user = get_user_model().objects.get(phone=phone)
+        try:
+            user = get_user_model().objects.get(phone=phone)
+        except get_user_model().DoesNotExist:
+            return Response(
+                {
+                    "message": "Phone number is not registered",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         otp = send_sms(user, phone)
 
         return Response(
