@@ -43,7 +43,7 @@ class CreateTokenView(ObtainAuthToken):
         # user = get_user_model().objects.get(phone=phone) or get_user_model().objects.get(
         #     email=email
         # )
-        try: 
+        try:
             user = get_user_model().objects.get(Q(phone=phone) | Q(email=email))
         except get_user_model().DoesNotExist:
             return Response(
@@ -75,22 +75,26 @@ class CreateTokenView(ObtainAuthToken):
                     status=status.HTTP_403_FORBIDDEN,
                 )
         else:
+            if not user.is_active:
+                return Response(
+                    {
+                        "status": 403,
+                        "message": "User phone number is not verified",
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
             user = authenticate(
                 username=phone,
                 password=password,
             )
-        if not user.is_active:
-            return Response(
-                {
-                    "status": 403,
-                    "message": "User phone number is not verified",
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        if not user:
-            msg = "Unable to authenticate with provided credentials"
-            raise serializers.ValidationError(msg)
+            if not user:
+                return Response(
+                    {
+                        "status": 403,
+                        "message": "Wrong username or password",
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         # serializer = AuthTokenSerializer(data=request.data)
         # serializer.is_valid(raise_exception=True)
@@ -101,8 +105,10 @@ class CreateTokenView(ObtainAuthToken):
         return Response(
             {
                 "status": 200,
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
+                "data": {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                },
             },
             status=status.HTTP_200_OK,
         )
@@ -152,9 +158,9 @@ def send_sms(user, phone):
 
     phone_converted = "+84" + phone[1:]
 
-    TWILIO_ACCOUNT_SID = "AC92c8ec806af7d36d0953a609f0abffdd"
-    TWILIO_AUTH_TOKEN = "8b61090707dac481030fc381e1510c5d"
-    phone_number = "+14342645429"
+    TWILIO_ACCOUNT_SID = "ACd2f88bc27251c6edbdf6d0a38b7a7584"
+    TWILIO_AUTH_TOKEN = "336cf2995fa426d7523f2eec2bde39a3"
+    phone_number = "+19094036208"
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
     message = client.messages.create(
         body=f"Your verification code is {random_str}",
